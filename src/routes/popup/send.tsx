@@ -21,8 +21,11 @@ import Head from "~components/popup/Head";
 import useSetting from "~settings/hook";
 import styled from "styled-components";
 import Arweave from "@arconnect/arweave";
+import { useHashLocation } from "~utils/hash_router";
+import { sha256 } from "js-sha256";
 
 export default function Send() {
+  const [, setLocation] = useHashLocation();
   // amount
   const startAmount = 1;
   const [amount, setAmount] = useState(startAmount);
@@ -140,8 +143,37 @@ export default function Send() {
         },
         wallet
       );
-
+      // console.log("------before sign transaction--1111--------");
+      // const signatureData = Buffer.from(await  tx.getSignatureData()).toString('hex');
+      // console.log({tx, signatureData});
+      // console.log("----------------");
+      // const keyring = DefaultKeyring.getEmptyKeyring();
+      // await keyring.syncKeyring();
+      // const signature = keyring.signTransaction(JSON.stringify(tx.toJSON()))
       await arweave.transactions.sign(tx, wallet);
+      // const tx = {
+      //   "format": 2,
+      //   "id": "IPCKu_VOL_OAF6OAWsQbDUqSwzyr9nbnkfbtNJenYPY",
+      //   "last_tx": "VGdb4vZ_-UVVMym3NYRy3mPQGBcl907Fv_Ul3IsDCNah_t7nNzMZBc-SRMMWBqsl",
+      //   "owner": "tW3_qttE4BnykJyFhOYmdIRDSgFhoqbtaNHw8b77S-2HyDUiZITC21VnJQ_4efMb78h88lQ9Pj4em5LKixN4dx-jPJxvQOjF-VG0zOb2YtBXi_JnDQLQyuA0MK_7r1TfesbG7a_3niEyaEqfM8xuLrZ_rIy0xzt8DCsuiBcLtTuT9xneH_xPe7GV2qXlkM-k34wCPlcL0N99pwP--ECr9QLNpPUnhUwK7Gz0_bTojbErD_RSko0GT6nNjhCsMjQBT60gWe8-Xqz23rokCdN2jG9kSA52GgkN63EdibNW-U9g2NLE8r0XcICrMjIqiUaLNJRwZzMS1xsX_ySXaeMNMUrhwaaPjnzDEqNcyX89-0rXZtFrmIaJb8jTinwGvBds0UwdT-NXGtbVRfrwWOTkbJT--GFZS_fvpe1VhpVLz2o0l0YairrjE5AZb8T463qOHtJ4tlCpEQcC6oJA2MSrkg3qcsBdJLkA24xOZO3TiCSStlOMbMGTWF72050OU3M2hLAE7Rdk6VaJNy-RhgcR7OlhDYPElUlcOKAu6Kr7n9dNHjKVE3GyFFieMs7lgrkUSHuVfxwF0_lek_YJ8BvlCKfeYpevwXvIDvyLqD0sWLRUCLbGKmL2QPC-yvhlBdslyyXckMZN2_MofXg5YVYOzx8A2V_04IGpqB7-_MU2Xl0",
+      //   "tags": [],
+      //   "target": "eMCuSpXHZnPZ3AJsWqqs3Td7YrgD4E44fdDyBKxPT0I",
+      //   "quantity": "1000000000000",
+      //   "data": "",
+      //   "data_size": "0",
+      //   "data_root": "",
+      //   "reward": "477648",
+      //   "signature": "Q0G5zPRFpTpmguXaQllkUyhhDoYBxZoJqWkEC55tIXsfHQRk6EllvG780ZUqltxYZZtz8GanovnGm3Pt3NTGHHjUiqnX_BtY9dAs3CZBcdqV8w50SoQiTjfYyH5IGirFQCuNptfj02MsHTPypEb2VvTMtvSjts3qxxBofl3ZKy6GaQzqqrb5l0YnxbKh-klE4kcqz9XQ5rjplks_lYJb9ADUvkmM-3lqXvlPniOZn3nv5wX_-x3MKIyfo_wovGWHys_sRk4e1N4hAHAvsT-Re3sil-V6TeBs623vtHLKgbrW1dOd-P3dGy7utshsI6fxQ25t7IQqPHnFH_Up_ea-36QlbBowskn6aGFsSvWv0YWSrVWSUm9fImQ49pk5CQr4Bly67ixgE_w1Vbgb_5er-ll2EXtQkwYTSHr4-A7wBmtaBkJDra5UF3HU6Jceki31Bxv92jarASCAQ95N7DREvbaSWBg0USKSuU37ADSXxfkRe9yR3ymaqLObEzbeZWnLh4rPirsU4_TnQULq1eWnZ6Am_meacZUWwYv9Zt2YoHZtnnn1WSL-gdbFmYbX7s2b0Wg8ZxkcesibeQ-cOy6KRigXl5nVY7WTaJ4NDkIl98kuPqFe8Chhh3RjB39nFQ93bShTN45Fi308BnFgFl4L0QtzqJXS-eNtqPuhSieq7_A"
+      // }
+      // const transaction = arweave.transactions.fromRaw(tx);
+      // transaction.setSignature({
+      //   id: "IPCKu_VOL_OAF6OAWsQbDUqSwzyr9nbnkfbtNJenYPY",
+      //   owner: "tW3_qttE4BnykJyFhOYmdIRDSgFhoqbtaNHw8b77S-2HyDUiZITC21VnJQ_4efMb78h88lQ9Pj4em5LKixN4dx-jPJxvQOjF-VG0zOb2YtBXi_JnDQLQyuA0MK_7r1TfesbG7a_3niEyaEqfM8xuLrZ_rIy0xzt8DCsuiBcLtTuT9xneH_xPe7GV2qXlkM-k34wCPlcL0N99pwP--ECr9QLNpPUnhUwK7Gz0_bTojbErD_RSko0GT6nNjhCsMjQBT60gWe8-Xqz23rokCdN2jG9kSA52GgkN63EdibNW-U9g2NLE8r0XcICrMjIqiUaLNJRwZzMS1xsX_ySXaeMNMUrhwaaPjnzDEqNcyX89-0rXZtFrmIaJb8jTinwGvBds0UwdT-NXGtbVRfrwWOTkbJT--GFZS_fvpe1VhpVLz2o0l0YairrjE5AZb8T463qOHtJ4tlCpEQcC6oJA2MSrkg3qcsBdJLkA24xOZO3TiCSStlOMbMGTWF72050OU3M2hLAE7Rdk6VaJNy-RhgcR7OlhDYPElUlcOKAu6Kr7n9dNHjKVE3GyFFieMs7lgrkUSHuVfxwF0_lek_YJ8BvlCKfeYpevwXvIDvyLqD0sWLRUCLbGKmL2QPC-yvhlBdslyyXckMZN2_MofXg5YVYOzx8A2V_04IGpqB7-_MU2Xl0",
+      //   signature: "Q0G5zPRFpTpmguXaQllkUyhhDoYBxZoJqWkEC55tIXsfHQRk6EllvG780ZUqltxYZZtz8GanovnGm3Pt3NTGHHjUiqnX_BtY9dAs3CZBcdqV8w50SoQiTjfYyH5IGirFQCuNptfj02MsHTPypEb2VvTMtvSjts3qxxBofl3ZKy6GaQzqqrb5l0YnxbKh-klE4kcqz9XQ5rjplks_lYJb9ADUvkmM-3lqXvlPniOZn3nv5wX_-x3MKIyfo_wovGWHys_sRk4e1N4hAHAvsT-Re3sil-V6TeBs623vtHLKgbrW1dOd-P3dGy7utshsI6fxQ25t7IQqPHnFH_Up_ea-36QlbBowskn6aGFsSvWv0YWSrVWSUm9fImQ49pk5CQr4Bly67ixgE_w1Vbgb_5er-ll2EXtQkwYTSHr4-A7wBmtaBkJDra5UF3HU6Jceki31Bxv92jarASCAQ95N7DREvbaSWBg0USKSuU37ADSXxfkRe9yR3ymaqLObEzbeZWnLh4rPirsU4_TnQULq1eWnZ6Am_meacZUWwYv9Zt2YoHZtnnn1WSL-gdbFmYbX7s2b0Wg8ZxkcesibeQ-cOy6KRigXl5nVY7WTaJ4NDkIl98kuPqFe8Chhh3RjB39nFQ93bShTN45Fi308BnFgFl4L0QtzqJXS-eNtqPuhSieq7_A"
+      // })
+      // console.log("----------------");
+      // console.log(tx);
+      // console.log("----------------");
       await arweave.transactions.post(tx);
 
       setToast({
@@ -149,7 +181,10 @@ export default function Send() {
         content: browser.i18n.getMessage("sent_tx"),
         duration: 2000
       });
-    } catch {
+    } catch (e) {
+      console.log("------error----------");
+      console.log(e);
+      console.log("----------------");
       return setToast({
         type: "error",
         content: browser.i18n.getMessage("txFailed"),
@@ -164,6 +199,7 @@ export default function Send() {
 
   return (
     <Wrapper>
+      Send
       <div>
         <Head title={browser.i18n.getMessage("send")} />
         <Spacer y={1} />
