@@ -25,8 +25,8 @@ const WrapperPage = styled.div`
   }
 
   .qrCode {
-    height: 185px;
-    width: 185px;
+    height: 285px;
+    width: 285px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -97,15 +97,15 @@ function Player({ cbor, type, onGetSignature }) {
           <AnimatedQRCode cbor={cbor} type={type} options={{ size: 175 }} />
         )}
       </div>
-      <div className="buttons">
-        <Button
-          className="button"
-          disabled={!isQRCodeReady}
-          onClick={onGetSignature}
-        >
-          getSignature
-        </Button>
-      </div>
+      {/*<div className="buttons">*/}
+      {/*  <Button*/}
+      {/*    className="button"*/}
+      {/*    disabled={!isQRCodeReady}*/}
+      {/*    onClick={onGetSignature}*/}
+      {/*  >*/}
+      {/*    getSignature*/}
+      {/*  </Button>*/}
+      {/*</div>*/}
     </WrapperPage>
   );
 }

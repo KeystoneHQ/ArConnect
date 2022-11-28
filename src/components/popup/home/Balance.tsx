@@ -128,6 +128,10 @@ export default function Balance() {
           <ActionButton onClick={() => setLocation("/reader")} />
           <ActionButton
             as={ArrowDownLeftIcon}
+            onClick={() => setLocation("/player")}
+          />
+          <ActionButton
+            as={ArrowDownLeftIcon}
             onClick={() => setLocation("/receive")}
           />
           <ActionButton

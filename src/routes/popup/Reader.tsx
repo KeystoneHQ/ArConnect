@@ -89,33 +89,36 @@ import browser from "webextension-polyfill";
 import { useToasts } from "@arconnect/components";
 import Transaction from "arweave/web/lib/transaction";
 
-function Reader({ tx, sigData }) {
+function Reader() {
   const { setToast } = useToasts();
-  console.log("---------reader-------");
-  console.log({ tx, sigData: Buffer.from(sigData).toString("hex") });
-  console.log("----------------");
-  const arweave = new Arweave(defaultGateway);
   const [cameraStatus, setCameraStatus] = useState(CAMERA_STATUS.READY);
   const [errorMessage, setErrorMessage] = useState("");
-  const [transaction, setTransaction] = useState();
-  // useEffect( ()=>{
-  //   const createTransaction = async ()=>arweave.createTransaction(
-  //     {
-  //       target: "GUi7tqQ3zJW2CWyw2ERwwunCW3oWoI5HAsiENHrRz98",
-  //       quantity: arweave.ar.arToWinston("0.01"),
-  //     });
-  //   createTransaction().then((tx)=>{
-  //     tx.setOwner("w0SjfQ-iGxJZFTHIloiFG4aHxAKoPyHy1TENudi6EliSiPBsCgdgNjl7c-KctPkAo0FgwYd21PnXH4HLwGHYtPj38tTnQOvCruRumwn-3EOSuj9ekP2yik5HlWz8JIc9u_iDCZvia4ci5Nj2_3P_2L0NgNpVvjorxSDvs6-H7FtooaMSwMHwL6hOGEdmrliiHOZ7pLIioqbAV4j7GJptDQ77rUKTgNCo5IQ7zKgEugeGKSpd5KhITNsDwgngiT-IQK8BLcz7GVgaTjzoStzQ38WlhEGPvLtrsZATBDRVxxWze9stjE44O0EoNZdyTBER9hxch5aFZKNkTeAwyTPh8SM02vwIR6tiAl7y7WWmeGEv6nuELGbOTaPOR5bBT3HwP4qJ6fIAFMbOhKP8DgPlUZ5OeOdcKVDHlOeboshS21eYHInwuduaszdt3F0EzvGyW6C5CJs0rz4woJbciGVL1ct5Igw7NDQcmr0XNrfkU-XcN66RlEFf3tAXx6UBfQ0vidNUz6xUnGNXrk-iJ6Gacejvy5-Nm5sj43r_OD7OK7fbxq783wvMPwoPsYebEiX-cQPD55_Nkh7M0T9bhsMMfFOob7RXSIf7apaDksGva2_Smxz5HZHaxzax0Jh7M-giVxijxtD9PKtG4um7LL99VP7VYaFp0I0oP7UFGc5RjIU");
-  //     console.log("-----tx-----------");
-  //     console.log({tx});
-  //     console.log("----------------");
-  //     tx.getSignatureData().then((data)=>{
-  //       console.log(Buffer.from(data).toString('hex'));
-  //       // @ts-ignore
-  //       setTransaction(tx)
-  //     })
-  //   });
-  // },[]);
+  const checkCameraPermission = async () => {
+    console.log("----------------");
+    console.log("checkCameraPermission checkCameraPermission");
+    console.log("----------------");
+    const devices = await window.navigator.mediaDevices.enumerateDevices();
+    const webcams = devices.filter((device) => device.kind === "videoinput");
+    const hasWebcamPermissions = webcams.some(
+      (webcam) => webcam.label && webcam.label.length > 0
+    );
+    if (!hasWebcamPermissions) {
+      window.open(`./popup.html#/permission`);
+      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        window.close();
+      });
+    }
+  };
+  useEffect(() => {
+    console.log("----------------");
+    console.log("checkCameraPermission");
+    console.log("----------------");
+    checkCameraPermission();
+  }, []);
+
   const getSignatureData = (signature) => {
     const signatureBuf = Arweave.utils.bufferTob64Url(signature);
     const id = Arweave.utils.bufferTob64Url(
@@ -123,39 +126,11 @@ function Reader({ tx, sigData }) {
     );
     return { signatureBuf, id };
   };
-  const onScanSuccess = useCallback(
-    async ({ cbor }) => {
-      console.log("----------------");
-      console.log(cbor);
-      console.log("----------------");
-      const arweaveSignature = ArweaveSignature.fromCBOR(
-        Buffer.from(cbor, "hex")
-      );
-      console.log("----------------", {
-        arweaveSignature: arweaveSignature.getSignature()
-      });
-      const { signatureBuf, id } = getSignatureData(
-        arweaveSignature.getSignature()
-      );
-      console.log({ signatureBuf, id });
-      console.log("----------------");
-      const owner =
-        "w0SjfQ-iGxJZFTHIloiFG4aHxAKoPyHy1TENudi6EliSiPBsCgdgNjl7c-KctPkAo0FgwYd21PnXH4HLwGHYtPj38tTnQOvCruRumwn-3EOSuj9ekP2yik5HlWz8JIc9u_iDCZvia4ci5Nj2_3P_2L0NgNpVvjorxSDvs6-H7FtooaMSwMHwL6hOGEdmrliiHOZ7pLIioqbAV4j7GJptDQ77rUKTgNCo5IQ7zKgEugeGKSpd5KhITNsDwgngiT-IQK8BLcz7GVgaTjzoStzQ38WlhEGPvLtrsZATBDRVxxWze9stjE44O0EoNZdyTBER9hxch5aFZKNkTeAwyTPh8SM02vwIR6tiAl7y7WWmeGEv6nuELGbOTaPOR5bBT3HwP4qJ6fIAFMbOhKP8DgPlUZ5OeOdcKVDHlOeboshS21eYHInwuduaszdt3F0EzvGyW6C5CJs0rz4woJbciGVL1ct5Igw7NDQcmr0XNrfkU-XcN66RlEFf3tAXx6UBfQ0vidNUz6xUnGNXrk-iJ6Gacejvy5-Nm5sj43r_OD7OK7fbxq783wvMPwoPsYebEiX-cQPD55_Nkh7M0T9bhsMMfFOob7RXSIf7apaDksGva2_Smxz5HZHaxzax0Jh7M-giVxijxtD9PKtG4um7LL99VP7VYaFp0I0oP7UFGc5RjIU";
-      // const arweave = new Arweave(defaultGateway);
-      tx.setSignature({
-        owner,
-        signature: signatureBuf,
-        id
-      });
-      await arweave.transactions.post(tx);
-      setToast({
-        type: "success",
-        content: browser.i18n.getMessage("sent_tx"),
-        duration: 2000
-      });
-    },
-    [transaction]
-  );
+  const onScanSuccess = useCallback(async ({ cbor }) => {
+    console.log("----------------");
+    console.log(cbor);
+    console.log("----------------");
+  }, []);
 
   const onScanFailure = (error) => {
     if (
@@ -177,7 +152,7 @@ function Reader({ tx, sigData }) {
   return (
     <WrapperPage className="Reader">
       <AnimatedQRScanner
-        urTypes={["arweave-signature"]}
+        urTypes={["arweave-sign-request"]}
         handleScan={onScanSuccess}
         handleError={onScanFailure}
         videoLoaded={updateCameraStatus}
