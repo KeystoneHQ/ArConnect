@@ -91,8 +91,12 @@ import Transaction from "arweave/web/lib/transaction";
 
 function Reader({ tx, sigData }) {
   const { setToast } = useToasts();
-  console.log("---------reader-------");
-  console.log({ tx, sigData: Buffer.from(sigData).toString("hex") });
+  console.log("---------reader---123----");
+  console.log({
+    tx,
+    sigData: Buffer.from(sigData).toString("hex"),
+    jsonBuf: Buffer.from(JSON.stringify(tx.toString())).toString("hex")
+  });
   console.log("----------------");
   const arweave = new Arweave(defaultGateway);
   const [cameraStatus, setCameraStatus] = useState(CAMERA_STATUS.READY);
@@ -147,7 +151,12 @@ function Reader({ tx, sigData }) {
         signature: signatureBuf,
         id
       });
-      await arweave.transactions.post(tx);
+      try {
+        await arweave.transactions.post(tx);
+      } catch (e) {
+        console.log("post transaction failed");
+      }
+
       setToast({
         type: "success",
         content: browser.i18n.getMessage("sent_tx"),

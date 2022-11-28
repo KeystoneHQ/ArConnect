@@ -24,6 +24,9 @@ import Collectible from "~routes/popup/collectible/[id]";
 import Reader from "~routes/popup/Reader";
 import Arweave from "arweave";
 import { defaultGateway } from "~applications/gateway";
+import { DefaultKeyring } from "@keystonehq/arweave-keyring";
+
+// import ArweaveUtils from "arweave/web/lib/utils.js";
 
 export default function Popup() {
   const theme = useTheme();
@@ -49,25 +52,66 @@ export default function Popup() {
     (async () => {
       const storage = new Storage(getStorageConfig());
       const decryptionKey = await storage.get("decryption_key");
-      const transaction = await arweave.createTransaction({
-        target: "GUi7tqQ3zJW2CWyw2ERwwunCW3oWoI5HAsiENHrRz98",
-        quantity: arweave.ar.arToWinston("0.01")
+      // const transaction = await arweave.createTransaction({
+      //   target: "GUi7tqQ3zJW2CWyw2ERwwunCW3oWoI5HAsiENHrRz98",
+      //   quantity: arweave.ar.arToWinston("0.01")
+      // });
+      // const owner =
+      //   "w0SjfQ-iGxJZFTHIloiFG4aHxAKoPyHy1TENudi6EliSiPBsCgdgNjl7c-KctPkAo0FgwYd21PnXH4HLwGHYtPj38tTnQOvCruRumwn-3EOSuj9ekP2yik5HlWz8JIc9u_iDCZvia4ci5Nj2_3P_2L0NgNpVvjorxSDvs6-H7FtooaMSwMHwL6hOGEdmrliiHOZ7pLIioqbAV4j7GJptDQ77rUKTgNCo5IQ7zKgEugeGKSpd5KhITNsDwgngiT-IQK8BLcz7GVgaTjzoStzQ38WlhEGPvLtrsZATBDRVxxWze9stjE44O0EoNZdyTBER9hxch5aFZKNkTeAwyTPh8SM02vwIR6tiAl7y7WWmeGEv6nuELGbOTaPOR5bBT3HwP4qJ6fIAFMbOhKP8DgPlUZ5OeOdcKVDHlOeboshS21eYHInwuduaszdt3F0EzvGyW6C5CJs0rz4woJbciGVL1ct5Igw7NDQcmr0XNrfkU-XcN66RlEFf3tAXx6UBfQ0vidNUz6xUnGNXrk-iJ6Gacejvy5-Nm5sj43r_OD7OK7fbxq783wvMPwoPsYebEiX-cQPD55_Nkh7M0T9bhsMMfFOob7RXSIf7apaDksGva2_Smxz5HZHaxzax0Jh7M-giVxijxtD9PKtG4um7LL99VP7VYaFp0I0oP7UFGc5RjIU";
+      // transaction.setOwner(owner);
+      // const sigData = await transaction.getSignatureData();
+      // console.log("------popup------json--1211-");
+      // console.log({
+      //   dataBuf: Buffer.from(JSON.stringify(transaction.toJSON())).toString(
+      //     "hex"
+      //   ),
+      //   dataStr: JSON.stringify(transaction.toJSON()),
+      //   signatureData: Buffer.from(sigData).toString("hex")
+      // });
+      // console.log("---------------");
+      //
+      // // @ts-ignore
+      // setTx(transaction);
+      // // @ts-ignore
+      // setSigData(sigData);
+      const keyring = DefaultKeyring.getEmptyKeyring();
+      await keyring.readKeyring();
+      console.log("---------------");
+      console.log("read keyring finished");
+      console.log("---------------");
+      const tx = await arweave.createTransaction({
+        quantity: "100000000000",
+        target: "GUi7tqQ3zJW2CWyw2ERwwunCW3oWoI5HAsiENHrRz98"
       });
       const owner =
         "w0SjfQ-iGxJZFTHIloiFG4aHxAKoPyHy1TENudi6EliSiPBsCgdgNjl7c-KctPkAo0FgwYd21PnXH4HLwGHYtPj38tTnQOvCruRumwn-3EOSuj9ekP2yik5HlWz8JIc9u_iDCZvia4ci5Nj2_3P_2L0NgNpVvjorxSDvs6-H7FtooaMSwMHwL6hOGEdmrliiHOZ7pLIioqbAV4j7GJptDQ77rUKTgNCo5IQ7zKgEugeGKSpd5KhITNsDwgngiT-IQK8BLcz7GVgaTjzoStzQ38WlhEGPvLtrsZATBDRVxxWze9stjE44O0EoNZdyTBER9hxch5aFZKNkTeAwyTPh8SM02vwIR6tiAl7y7WWmeGEv6nuELGbOTaPOR5bBT3HwP4qJ6fIAFMbOhKP8DgPlUZ5OeOdcKVDHlOeboshS21eYHInwuduaszdt3F0EzvGyW6C5CJs0rz4woJbciGVL1ct5Igw7NDQcmr0XNrfkU-XcN66RlEFf3tAXx6UBfQ0vidNUz6xUnGNXrk-iJ6Gacejvy5-Nm5sj43r_OD7OK7fbxq783wvMPwoPsYebEiX-cQPD55_Nkh7M0T9bhsMMfFOob7RXSIf7apaDksGva2_Smxz5HZHaxzax0Jh7M-giVxijxtD9PKtG4um7LL99VP7VYaFp0I0oP7UFGc5RjIU";
-      transaction.setOwner(owner);
-      const sigData = await transaction.getSignatureData();
-      // @ts-ignore
-      setTx(transaction);
-      // @ts-ignore
-      setSigData(sigData);
-      if (!decryptionKey) {
-        setLocation("/unlock");
+      tx.setOwner(owner);
+      const signatureData = await tx.getSignatureData();
+      console.log({ tx, signatureData });
+
+      const signature = await keyring.signTransaction(
+        Buffer.from(JSON.stringify(tx.toJSON())),
+        0
+      );
+      let id = await Arweave.crypto.hash(signature, "sha256");
+      tx.setSignature({
+        id: Arweave.utils.bufferTob64Url(id),
+        owner,
+        signature: Arweave.utils.bufferTob64Url(rawSignature)
+      });
+      try {
+        await arweave.transactions.post(tx);
+      } catch (e) {
+        console.log(e);
       }
+      console.log("transaction pushed");
+      // if (!decryptionKey) {
+      //   setLocation("/unlock");
+      // }
     })();
   }, []);
 
-  const onGetSignature = () => {
+  const onGetSignature = (signature) => {
     console.log("----------------");
     console.log("onGetSignature is clicked");
     console.log("----------------");
@@ -79,7 +123,7 @@ export default function Popup() {
       <Wrapper>
         <Router hook={useHashLocation}>
           <Route path="/" component={Home} />
-          <Route path="/receive" component={Receive} />
+          <Route path="/send" component={Send} />
           {/*<Route path="/reader" component={Reader} />*/}
           <Route path="/reader">
             {tx && sigData && <Reader tx={tx} sigData={sigData}></Reader>}

@@ -626,7 +626,7 @@
     "@zxing/library" "^0.19.1"
     qrcode.react "^2.0.0"
 
-"@keystonehq/arweave-keyring@^0.0.1-alpha.1":
+"@keystonehq/arweave-keyring@^0.0.1-alpha.2":
   version "0.0.1-alpha.2"
   resolved "https://registry.yarnpkg.com/@keystonehq/arweave-keyring/-/arweave-keyring-0.0.1-alpha.2.tgz#46dad3ca4e9109b784c12bc506152dd0d4ab1b32"
   integrity sha512-Zz0N3VPyakogawjfvpNCzGIwARMb7EMmSJDSj8PB5JCAvdirhw6O0QgAB0qyLqkv1fuLz2PHwqHc6i1rMOonbA==

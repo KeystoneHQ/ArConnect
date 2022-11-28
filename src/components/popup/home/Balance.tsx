@@ -125,11 +125,11 @@ export default function Balance() {
         <>
           <Spacer x={0.18} />
           <ActionButton onClick={() => setLocation("/send")} />
-          <ActionButton onClick={() => setLocation("/reader")} />
-          <ActionButton
-            as={ArrowDownLeftIcon}
-            onClick={() => setLocation("/receive")}
-          />
+          {/*<ActionButton onClick={() => setLocation("/reader")} />*/}
+          {/*<ActionButton*/}
+          {/*  as={ArrowDownLeftIcon}*/}
+          {/*  onClick={() => setLocation("/receive")}*/}
+          {/*/>*/}
           <ActionButton
             as={GlobeIcon}
             onClick={() => setLocation("/explore")}
